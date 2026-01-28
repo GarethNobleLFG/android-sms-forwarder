@@ -2,7 +2,22 @@ require('dotenv').config();
 
 const { app, BrowserWindow, screen } = require('electron');
 const axios = require('axios');
+const path = require('path');
+const os = require('os');
 const ContactManager = require('./contacts');
+
+
+
+// Fix cache issues by setting proper app paths before app is ready
+const userDataPath = path.join(os.homedir(), 'AppData', 'Local', 'sms-desktop-overlay');
+const cachePath = path.join(userDataPath, 'cache');
+
+app.setPath('userData', userDataPath);
+app.setPath('cache', cachePath);
+
+// Disable GPU acceleration to prevent some Windows cache issues
+app.disableHardwareAcceleration();
+
 
 
 
@@ -45,7 +60,6 @@ function checkForMessages() {
 
 
 
-
 let overlayWindow;
 
 // Create the floating overlay window for the desktop overlay.
@@ -65,13 +79,28 @@ function createOverlay() {
         skipTaskbar: true,
         webPreferences: {
             nodeIntegration: true,
-            contextIsolation: false
+            contextIsolation: false,
+            // Disable web security to prevent cache issues
+            webSecurity: false,
+            // Disable cache
+            cache: false
         }
     });
 
     overlayWindow.loadFile('overlay.html');
     overlayWindow.show();
+    
+    // Add error handling
+    overlayWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+        console.log('Overlay failed to load:', errorDescription);
+    });
+    
+    overlayWindow.webContents.on('crashed', () => {
+        console.log('Overlay window crashed, recreating...');
+        createOverlay();
+    });
 }
+
 
 
 
@@ -79,7 +108,6 @@ function createOverlay() {
 
 // Show SMS message in overlay
 function showSMS(smsSender, smsMessage) {
-
     if (overlayWindow) {
         overlayWindow.webContents.send('show-sms-sender', smsSender);
         overlayWindow.webContents.send('show-sms-message', smsMessage);
@@ -89,9 +117,7 @@ function showSMS(smsSender, smsMessage) {
             overlayWindow.hide();
         }, 6000);
     }
-
 }
-
 
 
 
@@ -101,13 +127,10 @@ function showSMS(smsSender, smsMessage) {
 app.whenReady().then(() => {
     createOverlay();
 
-
     // Show default message
     setTimeout(() => {
         showSMS('System', 'Waiting for SMS messages...');
     }, 1000);
-
-
 
     checkForMessages();
     console.log('SMS Desktop Overlay is running!');
@@ -116,7 +139,18 @@ app.whenReady().then(() => {
 
 
 
+
 // Quit when all windows are closed
 app.on('window-all-closed', () => {
     app.quit();
+});
+
+
+
+
+// Handle app activation (macOS)
+app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+        createOverlay();
+    }
 });
