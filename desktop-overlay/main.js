@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const { app, BrowserWindow, screen } = require('electron');
 const axios = require('axios');
-const ContactManager = require('./contacts');
+const ContactManager = require('./services/contacts');
 
 app.disableHardwareAcceleration();
 app.commandLine.appendSwitch('--disable-http-cache');
@@ -71,7 +71,7 @@ function createOverlay() {
         }
     });
 
-    overlayWindow.loadFile('overlay.html');
+    overlayWindow.loadFile('./overlay/overlay.html');
     overlayWindow.show();
     
     // Add error handling
