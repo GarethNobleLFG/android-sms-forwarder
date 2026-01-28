@@ -18,7 +18,8 @@ const saveMessage = async (req, res) => {
 
         const newMessage = new Messages({
             sender: sender,
-            message: message
+            message: message,
+            sent: false
         })
 
 
@@ -53,9 +54,12 @@ const saveMessage = async (req, res) => {
 const getLatestMessages = async (req, res) => {
     try {
 
-        // Get ALL messages from database
-        const messages = await Messages.find({})
-            .select('_id sender message createdAt'); // Gets certain fields
+        // Get unsent messages from the last 30 seconds
+        const thirtySecondsAgo = new Date(Date.now() - 30000);
+        const messages = await Messages.find({
+            sent: false,
+            createdAt: { $gte: thirtySecondsAgo }
+        }).select('_id sender message sent createdAt');
 
 
         // Format response for desktop overlay
@@ -67,18 +71,21 @@ const getLatestMessages = async (req, res) => {
         }));
 
 
-        // Wipe the entire database after retrieving messages so no duplicates
-        await Messages.deleteMany({});
-        
+        // Mark all retrieved messages as sent
+        if (messages.length > 0) {
+            const messageIds = messages.map(msg => msg._id);
+            await Messages.updateMany(
+                { _id: { $in: messageIds } },
+                { $set: { sent: true } }
+            );
+            console.log(`Retrieved and marked ${messages.length} messages as sent.`);
+        }
 
-        console.log(`Retrieved ${messages.length} messages and wiped database.`);
 
-
-        
         res.json({
             messages: formattedMessages
         });
-    } 
+    }
     catch (error) {
         console.error('Error fetching/wiping messages:', error);
         res.status(500).json({

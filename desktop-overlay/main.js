@@ -94,6 +94,7 @@ let hideTimeout;
 
 // Show SMS message in overlay
 function showSMS(smsSender, smsMessage) {
+    
     if (overlayWindow) {
         // Clear any existing timeout if another message comes in.
         if (hideTimeout) {

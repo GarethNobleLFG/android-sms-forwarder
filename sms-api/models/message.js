@@ -8,6 +8,10 @@ const messageSchema = new mongoose.Schema({
     message: {
         type: String,
         required: true
+    },
+    sent: {
+        type: Boolean,
+        required: true
     }
 }, {
     timestamps: true // This adds createdAt and updatedAt, _id is automatic
