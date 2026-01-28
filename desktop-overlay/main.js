@@ -3,13 +3,17 @@ require('dotenv').config();
 const { app, BrowserWindow, screen } = require('electron');
 const checkForMessages = require('./services/smsService');
 
+
+
+// Disable caching from extractor to prevent permission issues.
 app.disableHardwareAcceleration();
 app.commandLine.appendSwitch('--disable-http-cache');
 
 
-
-
+// File wide accessible overlayWindow.
 let overlayWindow;
+
+
 
 // Create the floating overlay window for the desktop overlay.
 function createOverlay() {
