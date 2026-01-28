@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_url_hint">https://your-api-endpoint.com/sms</string>
+    <string name="api_url_label">API Endpoint URL:</string>
+    <string name="app_name">SMS Forwarder</string>
+    <string name="app_title">SMS Forwarder</string>
+    <string name="instructions">This app will automatically forward all incoming SMS messages to your configured API endpoint. Make sure to grant SMS permissions when prompted.</string>
+    <string name="permissions_note">Note: This app requires SMS permissions to function properly. The app will not store or access your messages beyond forwarding them to your API.</string>
+    <string name="save_button">Save API URL</string>
+    <string name="status_default">Status: Ready</string>
+</resources>

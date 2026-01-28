@@ -13,3 +13,18 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+
+# APK files
+*.apk
+*.aab
+
+# Keystore files (if you create any)
+*.keystore
+*.jks
+
+# Android Studio
+*.iws
+/out/
+.navigation/
+*.tmp
