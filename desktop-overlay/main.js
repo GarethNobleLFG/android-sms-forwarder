@@ -99,9 +99,9 @@ function showSMS(smsSender, smsMessage) {
         overlayWindow.webContents.send('show-sms-message', smsMessage);
         overlayWindow.show();
 
-        // setTimeout(() => {
-        //     overlayWindow.hide();
-        // }, 6000);
+        setTimeout(() => {
+            overlayWindow.hide();
+        }, 6000);
     }
 
 }
