@@ -1,8 +1,12 @@
 const express = require('express');
 const cors = require('cors');
 
-//Import DB connection funciton.
+// Import DB connection funciton.
 const connectDb = require('./config/database');
+
+// Import routes.
+const smsRoutes = require('./routes/smsRoutes');
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,6 +31,8 @@ app.get('/', (req, res) => {
         timestampe: new Date().toISOString()
     });
 });
+app.use('/sms-api', smsRoutes);
+
 
 // Start server
 app.listen(PORT, () => {
