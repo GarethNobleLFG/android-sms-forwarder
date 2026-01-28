@@ -54,7 +54,7 @@ const saveMessage = async (req, res) => {
 const getLatestMessages = async (req, res) => {
     try {
 
-        // Get messages from the past minute
+        // Get messages from the past minute and have sent marked as false.
         const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
         const messages = await Messages.find({
             createdAt: { $gte: oneMinuteAgo },
@@ -62,7 +62,8 @@ const getLatestMessages = async (req, res) => {
         }).select('_id sender message sent createdAt');
 
 
-        // Format response for desktop overlay
+
+        // Format response for desktop overlay to use.
         const formattedMessages = messages.map(msg => ({
             id: msg._id,
             sender: msg.sender,
@@ -71,14 +72,19 @@ const getLatestMessages = async (req, res) => {
         }));
 
 
-        // Mark all retrieved messages as sent
+
+        // Mark all retrieved messages as sent.
+        const messageIds = [];
         if (messages.length > 0) {
-            const messageIds = messages.map(msg => msg._id);
+            for (let i = 0; i < messages.length; i++) {
+                messageIds.push(messages[i]._id);
+            }
+
             await Messages.updateMany(
                 { _id: { $in: messageIds } },
                 { $set: { sent: true } }
             );
-            console.log(`Retrieved and marked ${messages.length} messages as sent.`);
+            console.log(`Updated sent confirmation of ${messages.length} messages!`);
         }
 
 
