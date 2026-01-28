@@ -2,22 +2,10 @@ require('dotenv').config();
 
 const { app, BrowserWindow, screen } = require('electron');
 const axios = require('axios');
-const path = require('path');
-const os = require('os');
 const ContactManager = require('./contacts');
 
-
-
-// Prevent cache issues by setting proper app paths before app is ready.
-const userDataPath = path.join(os.homedir(), 'AppData', 'Local', 'sms-desktop-overlay');
-const cachePath = path.join(userDataPath, 'cache');
-
-app.setPath('userData', userDataPath);
-app.setPath('cache', cachePath);
-
-// Disable GPU acceleration to prevent some Windows cache issues.
 app.disableHardwareAcceleration();
-
+app.commandLine.appendSwitch('--disable-http-cache');
 
 
 
@@ -80,10 +68,6 @@ function createOverlay() {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
-            // Disable web security to prevent cache issues.
-            webSecurity: false,
-            // Disable cache.
-            cache: false
         }
     });
 
@@ -106,15 +90,24 @@ function createOverlay() {
 
 
 
+let hideTimeout;
+
 // Show SMS message in overlay
 function showSMS(smsSender, smsMessage) {
     if (overlayWindow) {
+        // Clear any existing timeout if another message comes in.
+        if (hideTimeout) {
+            clearTimeout(hideTimeout);
+        }
+
         overlayWindow.webContents.send('show-sms-sender', smsSender);
         overlayWindow.webContents.send('show-sms-message', smsMessage);
         overlayWindow.show();
 
-        setTimeout(() => {
+        // Set new timeout.
+        hideTimeout = setTimeout(() => {
             overlayWindow.hide();
+            hideTimeout = null; // Set to null to reset.
         }, 6000);
     }
 }
