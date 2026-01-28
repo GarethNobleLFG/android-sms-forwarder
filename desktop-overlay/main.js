@@ -48,7 +48,7 @@ function checkForMessages() {
         catch (error) {
             console.log('❌ Cannot connect to SMS API:', error.message);
         }
-    }, 2000);
+    }, 500);
 }
 
 

@@ -53,55 +53,41 @@ const saveMessage = async (req, res) => {
 // Get latest messages for desktop overlay
 const getLatestMessages = async (req, res) => {
     try {
-        console.log('🔍 Desktop overlay requesting latest messages...');
-        
-        // Debug: Get ALL recent messages regardless of sent status
-        const fiveMinutesAgo = new Date(Date.now() - 300000); // 5 minutes
-        const allRecentMessages = await Messages.find({
-            createdAt: { $gte: fiveMinutesAgo }
-        }).select('_id sender message sent createdAt');
 
-        console.log(`📊 ALL recent messages in database: ${allRecentMessages.length}`);
-        allRecentMessages.forEach(msg => {
-            console.log(`  - ${msg.sender}: "${msg.message}" sent=${msg.sent} (${msg.createdAt.toISOString()})`);
-        });
-
-        // Get only unsent messages
-        const unsentMessages = await Messages.find({
+        // Get unsent messages.
+        const messages = await Messages.find({
             sent: false,
-            createdAt: { $gte: fiveMinutesAgo }
         }).select('_id sender message sent createdAt');
 
-        console.log(`📬 Unsent messages: ${unsentMessages.length}`);
 
         // Format response for desktop overlay
-        const formattedMessages = unsentMessages.map(msg => ({
+        const formattedMessages = messages.map(msg => ({
             id: msg._id,
             sender: msg.sender,
             message: msg.message,
             timestamp: msg.createdAt
         }));
 
+
         // Mark all retrieved messages as sent
-        if (unsentMessages.length > 0) {
-            const messageIds = unsentMessages.map(msg => msg._id);
+        if (messages.length > 0) {
+            const messageIds = messages.map(msg => msg._id);
             await Messages.updateMany(
                 { _id: { $in: messageIds } },
                 { $set: { sent: true } }
             );
-            console.log(`✅ Marked ${unsentMessages.length} messages as sent.`);
+            console.log(`Retrieved and marked ${messages.length} messages as sent.`);
         }
 
-        console.log('📤 Sending response with', formattedMessages.length, 'messages');
-        
+
         res.json({
             messages: formattedMessages
         });
-    } 
+    }
     catch (error) {
-        console.error('❌ Error:', error);
+        console.error('Error fetching/wiping messages:', error);
         res.status(500).json({
-            error: 'Failed to fetch messages'
+            error: 'Failed to fetch and wipe messages'
         });
     }
 };
