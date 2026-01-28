@@ -39,13 +39,14 @@ function createOverlay() {
     overlayWindow = new BrowserWindow({
         width: 350,
         height: 120,
-        x: width - 370,  // Position at top-right
+        x: width - 370,
         y: 20,
-        frame: false,       // No window border
-        alwaysOnTop: true,  // Always stay on top
-        transparent: true,  // See-through background
+        frame: false,
+        alwaysOnTop: true,
+        transparent: true,
+        backgroundColor: '#00000000', // Fully transparent background
         resizable: false,
-        skipTaskbar: true,  // Don't show in taskbar
+        skipTaskbar: true,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false
@@ -53,9 +54,8 @@ function createOverlay() {
     });
 
     overlayWindow.loadFile('overlay.html');
-    overlayWindow.hide(); // Start hidden
+    overlayWindow.show();
 }
-
 
 
 
@@ -69,9 +69,9 @@ function showSMS(smsSender, smsMessage) {
         overlayWindow.webContents.send('show-sms-message', smsMessage);
         overlayWindow.show();
 
-        setTimeout(() => {
-            overlayWindow.hide();
-        }, 6000);
+        // setTimeout(() => {
+        //     overlayWindow.hide();
+        // }, 6000);
     }
 
 }
@@ -81,12 +81,23 @@ function showSMS(smsSender, smsMessage) {
 
 
 
-// Start the app
+// Start the app 
 app.whenReady().then(() => {
     createOverlay();
+    
+    /*
+    // Show default message
+    setTimeout(() => {
+        showSMS('System', 'Waiting for SMS messages...');
+    }, 1000);
+    */
+
+    showSMS('System', 'Waiting for SMS messages...');
+
     checkForMessages();
     console.log('SMS Desktop Overlay is running!');
 });
+
 
 
 
