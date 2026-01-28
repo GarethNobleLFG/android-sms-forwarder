@@ -8,7 +8,7 @@ const axios = require('axios');
 function checkForMessages() {
     setInterval(async () => {
         try {
-            const response = await axios.get(`${process.env.API_URL}/latest-sms`);
+            const response = await axios.get(`${process.env.API_URL}/sms-api/latest`);
             const newSmsChats = response.data.messages || [];
 
             for (let i = 0; i < newSmsChats.length; i++) {

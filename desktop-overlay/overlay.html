@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>SMS Overlay</title>
+
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'slide-in': 'slideIn 0.3s ease-out',
+                    },
+                    keyframes: {
+                        slideIn: {
+                            '0%': { transform: 'translateX(100%)', opacity: '0' },
+                            '100%': { transform: 'translateX(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+
+</head>
+<body class="bg-black/85 backdrop-blur-lg rounded-xl p-4 text-white border border-white/20 shadow-2xl animate-slide-in">
+    <div class="flex flex-col gap-2">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center text-xs">
+                📱
+            </div>
+            <div class="font-semibold text-sm text-green-500 flex-1" id="sms-sender">
+                Unknown Sender
+            </div>
+            <div class="text-xs text-gray-400" id="timestamp"></div>
+        </div>
+        <div class="text-sm leading-relaxed text-gray-100 word-break max-h-15 overflow-y-auto scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-white/10" id="sms-message">
+            Loading message...
+        </div>
+    </div>
+
+
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        // Update timestamp
+        function updateTimestamp() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            document.getElementById('timestamp').textContent = timeString;
+        }
+
+        // Listen for SMS sender updates
+        ipcRenderer.on('show-sms-sender', (event, sender) => {
+            document.getElementById('sms-sender').textContent = sender || 'Unknown Sender';
+            updateTimestamp();
+        });
+
+        // Listen for SMS message updates
+        ipcRenderer.on('show-sms-message', (event, message) => {
+            document.getElementById('sms-message').textContent = message || 'No message content';
+        });
+
+        
+        // Initialize timestamp on load
+        updateTimestamp();
+    </script>
+
+
+</body>
+
+
+</html>
