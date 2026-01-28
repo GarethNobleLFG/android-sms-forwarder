@@ -62,18 +62,18 @@
             document.getElementById('timestamp').textContent = timeString;
         }
 
-        // Listen for SMS sender updates
+        // Listen for SMS sender updates and updates the DOM element.
         ipcRenderer.on('show-sms-sender', (event, sender) => {
             document.getElementById('sms-sender').textContent = sender || 'Unknown Sender';
             updateTimestamp();
         });
 
-        // Listen for SMS message updates
+        // Listen for SMS message updates and updates the DOM element.
         ipcRenderer.on('show-sms-message', (event, message) => {
             document.getElementById('sms-message').textContent = message || 'No message content';
         });
 
-        
+
         // Initialize timestamp on load
         updateTimestamp();
     </script>
