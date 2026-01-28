@@ -57,7 +57,8 @@ const getLatestMessages = async (req, res) => {
         // Get messages from the past minute
         const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
         const messages = await Messages.find({
-            createdAt: { $gte: oneMinuteAgo }
+            createdAt: { $gte: oneMinuteAgo },
+            sent: false
         }).select('_id sender message sent createdAt');
 
 
