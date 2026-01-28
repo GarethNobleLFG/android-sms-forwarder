@@ -1,3 +1,37 @@
 node_modules
 .env
 contacts.json
+
+
+
+
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+
+# APK files
+*.apk
+*.aab
+
+# Keystore files (if you create any)
+*.keystore
+*.jks
+
+# Android Studio
+*.iws
+/out/
+.navigation/
+*.tmp
