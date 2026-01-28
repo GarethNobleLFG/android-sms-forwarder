@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+require('dotenv').config();
 
 // Import DB connection funciton.
 const connectDb = require('./config/database');
@@ -9,7 +10,6 @@ const smsRoutes = require('./routes/smsRoutes');
 
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 connectDb();
 
@@ -35,6 +35,8 @@ app.use('/sms-api', smsRoutes);
 
 
 // Start server
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}!`);
-});
+if (process.env.NODE_ENV === 'development') {
+    app.listen(process.env.PORT, () => {
+        console.log(`Server running on port ${process.env.PORT}!`);
+    });
+}
