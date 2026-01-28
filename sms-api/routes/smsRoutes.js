@@ -9,6 +9,6 @@ router.post('/save', smsController.saveMessage);
 router.get('/latest', smsController.getLatestMessages);
 
 // DELETE - Wipe database of all data
-router.delte('/delete-db', smsController.deleteDb);
+router.delete('/delete-db', smsController.deleteDb);
 
 module.exports = router;
