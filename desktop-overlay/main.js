@@ -123,6 +123,7 @@ app.whenReady().then(() => {
     }, 1000);
 
     checkForMessages();
+    
     console.log('SMS Desktop Overlay is running!');
 });
 
