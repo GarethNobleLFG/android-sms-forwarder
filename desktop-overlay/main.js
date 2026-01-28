@@ -6,7 +6,7 @@ const axios = require('axios');
 
 
 
-// Check for new SMS messages every 2 seconds
+// Check for new SMS messages every 2 seconds.
 function checkForMessages() {
     setInterval(async () => {
         try {
