@@ -2,27 +2,6 @@ require('dotenv').config();
 
 const { app, BrowserWindow, screen } = require('electron');
 const axios = require('axios');
-const ContactManager = require('./contacts');
-const AutoLaunch = require('auto-launch');
-
-
-
-
-// Initialize contact manager
-const contactManager = new ContactManager();
-
-
-
-// Auto-launch setup
-const smsOverlayAutoLauncher = new AutoLaunch({
-    name: 'SMS Overlay',
-    path: 'C:\\Program Files\\nodejs\\node.exe',
-    arguments: [
-        'C:\\Users\\garet\\OneDrive\\Documents\\android-sms-forwarding\\desktop-overlay\\main.js'
-    ]
-});
-// Enable auto-launch
-smsOverlayAutoLauncher.enable();
 
 
 
