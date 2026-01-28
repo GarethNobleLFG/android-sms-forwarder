@@ -54,9 +54,10 @@ const saveMessage = async (req, res) => {
 const getLatestMessages = async (req, res) => {
     try {
 
-        // Get unsent messages.
+        // Get messages from the past minute
+        const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
         const messages = await Messages.find({
-            sent: false,
+            createdAt: { $gte: oneMinuteAgo }
         }).select('_id sender message sent createdAt');
 
 
