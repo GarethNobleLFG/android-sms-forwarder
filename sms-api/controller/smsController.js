@@ -52,12 +52,11 @@ const saveMessage = async (req, res) => {
 // Get latest messages for desktop overlay
 const getLatestMessages = async (req, res) => {
     try {
-        // Get messages from last 30 seconds to avoid missing rapid messages
-        const thirtySecondsAgo = new Date(Date.now() - 30000);
-        
-        const messages = await Messages.find({
-            createdAt: { $gte: thirtySecondsAgo }
-        }).select('_id sender message createdAt');
+
+        // Get ALL messages from database
+        const messages = await Messages.find({})
+            .select('_id sender message createdAt'); // Gets certain fields
+
 
         // Format response for desktop overlay
         const formattedMessages = messages.map(msg => ({
@@ -67,21 +66,23 @@ const getLatestMessages = async (req, res) => {
             timestamp: msg.createdAt
         }));
 
-        // Only wipe messages older than 30 seconds to prevent race conditions
-        await Messages.deleteMany({
-            createdAt: { $lt: thirtySecondsAgo }
-        });
+
+        // Wipe the entire database after retrieving messages so no duplicates
+        await Messages.deleteMany({});
         
-        console.log(`Retrieved ${messages.length} messages, cleaned old messages.`);
+
+        console.log(`Retrieved ${messages.length} messages and wiped database.`);
+
+
         
         res.json({
             messages: formattedMessages
         });
     } 
     catch (error) {
-        console.error('Error fetching messages:', error);
+        console.error('Error fetching/wiping messages:', error);
         res.status(500).json({
-            error: 'Failed to fetch messages'
+            error: 'Failed to fetch and wipe messages'
         });
     }
 };
