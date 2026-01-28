@@ -55,18 +55,27 @@ const getLatestMessages = async (req, res) => {
     try {
         console.log('🔍 Desktop overlay requesting latest messages...');
         
-        // Get ALL unsent messages (temporarily remove time restriction)
-        const messages = await Messages.find({
-            sent: false
+        // Debug: Get ALL recent messages regardless of sent status
+        const fiveMinutesAgo = new Date(Date.now() - 300000); // 5 minutes
+        const allRecentMessages = await Messages.find({
+            createdAt: { $gte: fiveMinutesAgo }
         }).select('_id sender message sent createdAt');
 
-        console.log(`📬 Unsent messages found: ${messages.length}`);
-        messages.forEach(msg => {
-            console.log(`  - ${msg.sender}: "${msg.message}" (created: ${msg.createdAt.toISOString()})`);
+        console.log(`📊 ALL recent messages in database: ${allRecentMessages.length}`);
+        allRecentMessages.forEach(msg => {
+            console.log(`  - ${msg.sender}: "${msg.message}" sent=${msg.sent} (${msg.createdAt.toISOString()})`);
         });
 
+        // Get only unsent messages
+        const unsentMessages = await Messages.find({
+            sent: false,
+            createdAt: { $gte: fiveMinutesAgo }
+        }).select('_id sender message sent createdAt');
+
+        console.log(`📬 Unsent messages: ${unsentMessages.length}`);
+
         // Format response for desktop overlay
-        const formattedMessages = messages.map(msg => ({
+        const formattedMessages = unsentMessages.map(msg => ({
             id: msg._id,
             sender: msg.sender,
             message: msg.message,
@@ -74,15 +83,13 @@ const getLatestMessages = async (req, res) => {
         }));
 
         // Mark all retrieved messages as sent
-        if (messages.length > 0) {
-            const messageIds = messages.map(msg => msg._id);
+        if (unsentMessages.length > 0) {
+            const messageIds = unsentMessages.map(msg => msg._id);
             await Messages.updateMany(
                 { _id: { $in: messageIds } },
                 { $set: { sent: true } }
             );
-            console.log(`✅ Retrieved and marked ${messages.length} messages as sent.`);
-        } else {
-            console.log('📭 No unsent messages to mark as sent.');
+            console.log(`✅ Marked ${unsentMessages.length} messages as sent.`);
         }
 
         console.log('📤 Sending response with', formattedMessages.length, 'messages');
@@ -92,9 +99,9 @@ const getLatestMessages = async (req, res) => {
         });
     } 
     catch (error) {
-        console.error('❌ Error fetching/updating messages:', error);
+        console.error('❌ Error:', error);
         res.status(500).json({
-            error: 'Failed to fetch and update messages'
+            error: 'Failed to fetch messages'
         });
     }
 };
