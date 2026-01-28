@@ -2,6 +2,13 @@ require('dotenv').config();
 
 const { app, BrowserWindow, screen } = require('electron');
 const axios = require('axios');
+const ContactManager = require('./contacts');
+
+
+
+
+// Initialize contact manager
+const contactManager = new ContactManager();
 
 
 
