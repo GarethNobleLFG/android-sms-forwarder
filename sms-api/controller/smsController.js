@@ -98,7 +98,35 @@ const getLatestMessages = async (req, res) => {
 
 
 
+
+const deleteDb = async (req, res) => {
+    try {
+        const deleteDb = await Messages.deleteMany({})
+
+        console.log(`Deleted DB: ${deleteDb.deletedCount}`);
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Successfully deleted DB!',
+            deletedCount: result.deletedCount
+        })
+    }
+    catch (error) {
+        console.error('Error deleting messages:', error);
+        res.status(500).json({
+            error: 'Failed to delete messages',
+            details: error.message
+        });
+    }
+}
+
+
+
+
+
+
 module.exports = {
     saveMessage,
-    getLatestMessages
+    getLatestMessages,
+    deleteDb
 };
