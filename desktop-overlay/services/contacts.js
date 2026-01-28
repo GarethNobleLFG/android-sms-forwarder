@@ -10,7 +10,7 @@ class ContactManager {
     // Load contacts from JSON file
     loadContacts() {
         try {
-            const contactsPath = path.join(__dirname, 'contacts.json');
+            const contactsPath = path.join(__dirname, '../contacts.json');
             const contactsData = fs.readFileSync(contactsPath, 'utf8');
             this.contacts = JSON.parse(contactsData).contacts;
             console.log(`Loaded ${Object.keys(this.contacts).length} contacts`);
