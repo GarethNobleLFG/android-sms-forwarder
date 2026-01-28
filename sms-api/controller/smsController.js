@@ -53,14 +53,17 @@ const saveMessage = async (req, res) => {
 // Get latest messages for desktop overlay
 const getLatestMessages = async (req, res) => {
     try {
-
-        // Get unsent messages from the last 30 seconds
-        const thirtySecondsAgo = new Date(Date.now() - 30000);
+        console.log('🔍 Desktop overlay requesting latest messages...');
+        
+        // Get ALL unsent messages (temporarily remove time restriction)
         const messages = await Messages.find({
-            sent: false,
-            createdAt: { $gte: thirtySecondsAgo }
+            sent: false
         }).select('_id sender message sent createdAt');
 
+        console.log(`📬 Unsent messages found: ${messages.length}`);
+        messages.forEach(msg => {
+            console.log(`  - ${msg.sender}: "${msg.message}" (created: ${msg.createdAt.toISOString()})`);
+        });
 
         // Format response for desktop overlay
         const formattedMessages = messages.map(msg => ({
@@ -70,7 +73,6 @@ const getLatestMessages = async (req, res) => {
             timestamp: msg.createdAt
         }));
 
-
         // Mark all retrieved messages as sent
         if (messages.length > 0) {
             const messageIds = messages.map(msg => msg._id);
@@ -78,18 +80,21 @@ const getLatestMessages = async (req, res) => {
                 { _id: { $in: messageIds } },
                 { $set: { sent: true } }
             );
-            console.log(`Retrieved and marked ${messages.length} messages as sent.`);
+            console.log(`✅ Retrieved and marked ${messages.length} messages as sent.`);
+        } else {
+            console.log('📭 No unsent messages to mark as sent.');
         }
 
-
+        console.log('📤 Sending response with', formattedMessages.length, 'messages');
+        
         res.json({
             messages: formattedMessages
         });
-    }
+    } 
     catch (error) {
-        console.error('Error fetching/wiping messages:', error);
+        console.error('❌ Error fetching/updating messages:', error);
         res.status(500).json({
-            error: 'Failed to fetch and wipe messages'
+            error: 'Failed to fetch and update messages'
         });
     }
 };
