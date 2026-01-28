@@ -23,10 +23,6 @@ function checkForMessages() {
         try {
             const response = await axios.get(`${process.env.API_URL}/sms-api/latest`);
 
-            if (response.data.messages.length === 0) {
-                console.log('No new messages found.');
-            }
-
             const newSmsChats = response.data.messages || [];
 
             for (let i = 0; i < newSmsChats.length; i++) {
