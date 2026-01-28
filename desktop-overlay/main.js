@@ -18,35 +18,27 @@ const contactManager = new ContactManager();
 
 
 // Check for new SMS messages every 2 seconds.
-// Check for new SMS messages every 2 seconds.
 function checkForMessages() {
     setInterval(async () => {
-        console.log('🔄 Checking for messages...');
         try {
-            const apiUrl = `${process.env.API_URL}/sms-api/latest`;
-            const response = await axios.get(apiUrl);
-            
-            console.log('📨 API Response:', JSON.stringify(response.data, null, 2));
-            
-            if (!response.data.messages || response.data.messages.length === 0) {
-                console.log('📭 No new messages found.');
-                return;
+            const response = await axios.get(`${process.env.API_URL}/sms-api/latest`);
+
+            if (response.data.messages.length === 0) {
+                console.log('No new messages found.');
             }
 
             const newSmsChats = response.data.messages || [];
-            console.log(`📬 Found ${newSmsChats.length} messages`);
 
             for (let i = 0; i < newSmsChats.length; i++) {
-                console.log('🆕 Processing message:', newSmsChats[i]);
-                
+                console.log('New SMS found:', newSmsChats[i].sender);
+
+                // Get contact name or just pass number if there is none.
                 const contactName = contactManager.getContactName(newSmsChats[i].sender);
-                console.log('📝 Contact resolved to:', contactName);
-                
                 showSMS(contactName, newSmsChats[i].message);
             }
         }
         catch (error) {
-            console.log('❌ Cannot connect to SMS API:', error.message);
+            console.log('Cannot connect to SMS API. :(');
         }
     }, 500);
 }
