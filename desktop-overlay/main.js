@@ -8,14 +8,14 @@ const ContactManager = require('./contacts');
 
 
 
-// Fix cache issues by setting proper app paths before app is ready
+// Prevent cache issues by setting proper app paths before app is ready.
 const userDataPath = path.join(os.homedir(), 'AppData', 'Local', 'sms-desktop-overlay');
 const cachePath = path.join(userDataPath, 'cache');
 
 app.setPath('userData', userDataPath);
 app.setPath('cache', cachePath);
 
-// Disable GPU acceleration to prevent some Windows cache issues
+// Disable GPU acceleration to prevent some Windows cache issues.
 app.disableHardwareAcceleration();
 
 
@@ -80,9 +80,9 @@ function createOverlay() {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
-            // Disable web security to prevent cache issues
+            // Disable web security to prevent cache issues.
             webSecurity: false,
-            // Disable cache
+            // Disable cache.
             cache: false
         }
     });
