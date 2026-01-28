@@ -1,8 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 
+//Import DB connection funciton.
+const connectDb = require('./config/database');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+connectDb();
 
 // Basic middleware
 app.use(cors());
