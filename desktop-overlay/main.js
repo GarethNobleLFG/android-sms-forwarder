@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const { app, BrowserWindow, screen } = require('electron');
 const axios = require('axios');
 
