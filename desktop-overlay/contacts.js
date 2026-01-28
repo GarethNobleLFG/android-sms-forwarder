@@ -14,10 +14,13 @@ class ContactManager {
             const contactsData = fs.readFileSync(contactsPath, 'utf8');
             this.contacts = JSON.parse(contactsData).contacts;
             console.log(`Loaded ${Object.keys(this.contacts).length} contacts`);
-        } catch (error) {
+        } 
+        catch (error) {
             console.log('No contacts file found or error loading contacts:', error.message);
         }
     }
+
+
 
     // Function to get contact name from phone number
     getContactName(phoneNumber) {
@@ -46,6 +49,8 @@ class ContactManager {
         return phoneNumber;
     }
 
+
+    
     // Reload contacts (useful for updating without restarting)
     reloadContacts() {
         this.loadContacts();
