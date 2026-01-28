@@ -108,7 +108,7 @@ const deleteDb = async (req, res) => {
         res.status(200).json({
             status: 'success',
             message: 'Successfully deleted DB!',
-            deletedCount: result.deletedCount
+            deletedCount: deleteDb.deletedCount
         })
     }
     catch (error) {
