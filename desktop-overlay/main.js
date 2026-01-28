@@ -2,6 +2,45 @@ require('dotenv').config();
 
 const { app, BrowserWindow, screen } = require('electron');
 const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
+
+
+
+
+// Load contacts from JSON file
+let contacts = {};
+try {
+    const contactsPath = path.join(__dirname, 'contacts.json');
+    const contactsData = fs.readFileSync(contactsPath, 'utf8');
+    contacts = JSON.parse(contactsData).contacts;
+}
+catch (error) {
+    console.log('No contacts file found or error loading contacts:', error.message);
+}
+
+
+
+
+// Function to get contact name from phone number
+function getContactName(phoneNumber) {
+    const cleanNumber = phoneNumber.replace(/[\s\-\(\)]/g, '');
+    
+    if (contacts[cleanNumber]) {
+        return contacts[cleanNumber];
+    }
+    
+    if (contacts['+1' + cleanNumber]) {
+        return contacts['+1' + cleanNumber];
+    }
+    
+    const withoutPrefix = cleanNumber.replace(/^\+1/, '');
+    if (contacts[withoutPrefix]) {
+        return contacts[withoutPrefix];
+    }
+    
+    return phoneNumber;
+}
 
 
 
@@ -15,7 +54,10 @@ function checkForMessages() {
 
             for (let i = 0; i < newSmsChats.length; i++) {
                 console.log('New SMS found:', newSmsChats[i].sender);
-                showSMS(newSmsChats[i].sender, newSmsChats[i].message);
+
+                // Get contact name or just pass number if there is none.
+                const contactName = getContactName(newSmsChats[i].sender);
+                showSMS(contactName, newSmsChats[i].message);
             }
         }
         catch (error) {
@@ -84,15 +126,14 @@ function showSMS(smsSender, smsMessage) {
 // Start the app 
 app.whenReady().then(() => {
     createOverlay();
-    
-    /*
+
+
     // Show default message
     setTimeout(() => {
         showSMS('System', 'Waiting for SMS messages...');
     }, 1000);
-    */
 
-    showSMS('System', 'Waiting for SMS messages...');
+
 
     checkForMessages();
     console.log('SMS Desktop Overlay is running!');
