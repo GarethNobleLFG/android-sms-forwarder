@@ -77,7 +77,6 @@
             document.getElementById('timestamp').textContent = timeString;
         }
 
-
         // Listen for SMS sender updates and update DOM element.
         ipcRenderer.on('show-sms-sender', (event, sender) => {
             document.getElementById('sms-sender').textContent = sender || 'Unknown Sender';
