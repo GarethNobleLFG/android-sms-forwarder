@@ -55,7 +55,7 @@ const getLatestMessages = async (req, res) => {
     try {
 
         // Get messages from the past minute and have sent marked as false.
-        const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
+        const oneMinuteAgo = new Date(Date.now() - 60 * 5000);
         const messages = await Messages.find({
             createdAt: { $gte: oneMinuteAgo },
             sent: false
