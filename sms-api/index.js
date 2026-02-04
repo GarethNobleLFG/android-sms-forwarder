@@ -14,15 +14,9 @@ const app = express();
 connectDb();
 
 // Basic middleware
-app.use('/sms-api', cors({
-  origin: true, // Allow all origins for API routes
-  credentials: true,
-  methods: ['GET', 'POST', 'DELETE', 'PUT', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-}));
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 
 // Simple logging
 app.use((req, res, next) => {
