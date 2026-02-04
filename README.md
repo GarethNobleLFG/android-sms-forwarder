@@ -20,3 +20,28 @@ This project creates a complete SMS forwarding pipeline:
    - Electron-based desktop application
    - Polls API every 2 seconds for new messages
    - Shows transparent floating notifications that auto-hide
+
+## Technologies Used
+
+### Android Application
+- **Kotlin** - Primary programming language for Android development
+- **Android SDK** (API 24-34) - Android development framework
+- **Gradle** - Build automation and dependency management
+- **AndroidX Libraries:**
+  - Core KTX - Kotlin extensions for Android
+  - AppCompat - Backward compatibility support
+  - Material Design Components - UI components
+  - ConstraintLayout - Advanced layouts
+- **Kotlin Coroutines** - Asynchronous programming for background operations
+- **JUnit & Espresso** - Testing frameworks
+
+### SMS API Server
+- **Node.js** - JavaScript runtime environment
+- **Express.js** - Web application framework
+- **Mongoose** - MongoDB object modeling for Node.js
+
+### Desktop Overlay Application
+- **Electron** - Framework for building cross-platform desktop apps
+- **Axios** - HTTP client for API communication
+- **HTML/TailwindCSS** - User interface rendering
+
