@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Check, Trash2, Inbox, Plus } from 'lucide-react';
-import audioFile from '../../../../assets/drumSound.wav'; 
+import audioFile from '../../../../assets/drumSound.wav';
 
 import { fetchLatestNotifications, markNotificationsAsRead } from '../hooks/notis';
 
@@ -78,10 +78,10 @@ export default function Overlay() {
     };
 
     return (
-        <div className="fixed top-0 right-0 w-96 p-4 max-h-screen overflow-y-hidden flex flex-col gap-3 pointer-events-none">
+        <div className="fixed top-0 right-0 w-96 p-4 h-screen flex flex-col gap-3 pointer-events-none">
 
             {/* The animationKey is applied here! When it increments, everything inside resets! */}
-            <div key={animationKey} className="flex flex-col gap-3 h-full">
+            <div key={animationKey} className="flex flex-col gap-3 h-full overflow-hidden">
 
                 {/* Top Bar */}
                 <AnimatePresence>
@@ -92,14 +92,14 @@ export default function Overlay() {
                             exit={{ opacity: 0, y: -20 }}
                             className="flex justify-between items-center pointer-events-auto shrink-0"
                         >
-                            <div className="flex items-center gap-2 bg-zinc-900/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-zinc-700/50 shadow-lg">
+                            <div className="flex items-center gap-2 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-700 shadow-lg">
                                 <Bell size={14} className="text-blue-400" />
                                 <span className="text-xs font-semibold text-zinc-200">{notifications.length} New</span>
                             </div>
 
                             <button
                                 onClick={handleClearAll}
-                                className="group flex items-center gap-1.5 bg-zinc-900/90 hover:bg-red-500/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-zinc-700/50 hover:border-red-500/50 shadow-lg transition-all duration-200"
+                                className="group flex items-center gap-1.5 bg-zinc-900 hover:bg-red-950 px-3 py-1.5 rounded-full border border-zinc-700 hover:border-red-500 shadow-lg transition-all duration-200"
                             >
                                 <Trash2 size={14} className="text-zinc-400 group-hover:text-red-400" />
                                 <span className="text-xs font-semibold text-zinc-400 group-hover:text-red-400">Clear All</span>
@@ -109,7 +109,7 @@ export default function Overlay() {
                 </AnimatePresence>
 
                 {/* Stack of Cards or Empty State */}
-                <div className="flex flex-col gap-3 overflow-y-auto pb-4 custom-scrollbar pointer-events-auto">
+                <div className="flex-1 flex flex-col gap-3 overflow-y-auto pb-4 scrollbar-none [&::-webkit-scrollbar]:hidden pointer-events-auto">
                     <AnimatePresence mode="wait">
                         {notifications.length === 0 ? (
                             <motion.div
@@ -117,7 +117,7 @@ export default function Overlay() {
                                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.9, y: -20 }}
-                                className="flex flex-col items-center justify-center py-10 px-4 bg-zinc-900/50 backdrop-blur-md rounded-2xl border border-zinc-800/50 text-center shadow-lg"
+                                className="flex flex-col items-center justify-center py-10 px-4 bg-zinc-900 rounded-2xl border border-zinc-700 text-center shadow-lg"
                             >
                                 <div className="bg-zinc-800/50 p-3 rounded-full mb-3">
                                     <Inbox size={24} className="text-zinc-500" />
@@ -135,7 +135,7 @@ export default function Overlay() {
                                         exit={{ opacity: 0, scale: 0.8, x: 50 }}
                                         transition={{ type: "spring", stiffness: 400, damping: 30 }}
                                         key={noti.id}
-                                        className="relative w-full rounded-2xl shadow-xl bg-zinc-900/85 backdrop-blur-xl border border-zinc-700/50 text-white flex flex-col p-4 overflow-hidden group"
+                                        className="relative w-full rounded-2xl shadow-xl bg-zinc-900 border border-zinc-700 text-white flex flex-col p-4 overflow-hidden group shrink-0"
                                     >
                                         <div className="flex items-start justify-between mb-2">
                                             <div className="flex items-center gap-2 overflow-hidden pr-8">
