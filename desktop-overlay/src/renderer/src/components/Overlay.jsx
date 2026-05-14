@@ -1,147 +1,179 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Check, Trash2, Inbox } from 'lucide-react'; // Added Inbox icon
+import { Bell, Check, Trash2, Inbox, Plus } from 'lucide-react';
 
-// Use standard ES6 imports here since notis.js is using 'export'
 import { fetchLatestNotifications, markNotificationsAsRead } from '../hooks/notis';
 
 export default function Overlay() {
     const [notifications, setNotifications] = useState([]);
+    
+    // This key forces Framer Motion to replay animations when it increments
+    const [animationKey, setAnimationKey] = useState(0);
+
+    useEffect(() => {
+        const triggerReplay = () => setAnimationKey(prev => prev + 1);
+        window.addEventListener('replay-animations', triggerReplay);
+        return () => window.removeEventListener('replay-animations', triggerReplay);
+    }, []);
 
     // Fetch notifications every 2 seconds
     useEffect(() => {
         const pollNotis = async () => {
-            const newNotis = await fetchLatestNotifications();
-            if (newNotis && newNotis.length > 0) {
-                setNotifications((prev) => {
-                    const existingIds = new Set(prev.map(n => n.id));
-                    const uniqueNew = newNotis.filter(n => !existingIds.has(n.id));
-                    return [...uniqueNew, ...prev]; 
-                });
+            try {
+                const newNotis = await fetchLatestNotifications();
+                if (newNotis && newNotis.length > 0) {
+                    setNotifications((prev) => {
+                        const existingIds = new Set(prev.map(n => n.id));
+                        const uniqueNew = newNotis.filter(n => !existingIds.has(n.id));
+                        return [...uniqueNew, ...prev];
+                    });
+                }
+            } catch (err) {
+                console.error("Polling error:", err);
             }
         };
 
         const interval = setInterval(pollNotis, 2000);
-        pollNotis(); 
+        pollNotis();
 
         return () => clearInterval(interval);
     }, []);
 
-    // Mark single as read
     const handleMarkAsRead = async (id) => {
         setNotifications(prev => prev.filter(n => n.id !== id));
+        if (typeof id === 'string' && id.startsWith('test-')) return;
         await markNotificationsAsRead([id]);
     };
 
-    // Clear all
     const handleClearAll = async () => {
-        const allIds = notifications.map(n => n.id);
+        const allIds = notifications.filter(n => !(typeof n.id === 'string' && n.id.startsWith('test-'))).map(n => n.id);
         setNotifications([]);
         if (allIds.length > 0) {
             await markNotificationsAsRead(allIds);
         }
     };
 
+    const handleAddTestNoti = () => {
+        const testNotification = {
+            id: `test-${Date.now()}`,
+            app_package: 'com.tester.framer',
+            title: 'Test Notification',
+            message: 'This is a mocked notification to test the UI animations, scrolling, and layout. It looks great!',
+            timestamp: Date.now(),
+            image_base64: null 
+        };
+        setNotifications(prev => [testNotification, ...prev]);
+    };
+
     return (
         <div className="fixed top-0 right-0 w-96 p-4 max-h-screen overflow-y-hidden flex flex-col gap-3 pointer-events-none">
-
-            {/* Top Bar - Shows count and clear all button */}
-            <AnimatePresence>
-                {notifications.length > 0 && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        className="flex justify-between items-center pointer-events-auto"
-                    >
-                        <div className="flex items-center gap-2 bg-zinc-900/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-zinc-700/50 shadow-lg">
-                            <Bell size={14} className="text-blue-400" />
-                            <span className="text-xs font-semibold text-zinc-200">{notifications.length} New</span>
-                        </div>
-
-                        <button
-                            onClick={handleClearAll}
-                            className="group flex items-center gap-1.5 bg-zinc-900/90 hover:bg-red-500/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-zinc-700/50 hover:border-red-500/50 shadow-lg transition-all duration-200"
-                        >
-                            <Trash2 size={14} className="text-zinc-400 group-hover:text-red-400" />
-                            <span className="text-xs font-semibold text-zinc-400 group-hover:text-red-400">Clear All</span>
-                        </button>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* The Stack of Notification Cards or Empty State */}
-            <div className="flex flex-col gap-3 overflow-y-auto pb-4 custom-scrollbar pointer-events-auto">
-                <AnimatePresence mode="wait">
-                    {notifications.length === 0 ? (
-                        // Empty State Widget
+            
+            {/* The animationKey is applied here! When it increments, everything inside resets! */}
+            <div key={animationKey} className="flex flex-col gap-3 h-full"> 
+                
+                {/* Top Bar */}
+                <AnimatePresence>
+                    {notifications.length > 0 && (
                         <motion.div
-                            key="empty-state"
-                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: -20 }}
-                            className="flex flex-col items-center justify-center py-10 px-4 bg-zinc-900/50 backdrop-blur-md rounded-2xl border border-zinc-800/50 text-center shadow-lg"
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className="flex justify-between items-center pointer-events-auto shrink-0"
                         >
-                            <div className="bg-zinc-800/50 p-3 rounded-full mb-3">
-                                <Inbox size={24} className="text-zinc-500" />
+                            <div className="flex items-center gap-2 bg-zinc-900/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-zinc-700/50 shadow-lg">
+                                <Bell size={14} className="text-blue-400" />
+                                <span className="text-xs font-semibold text-zinc-200">{notifications.length} New</span>
                             </div>
-                            <h3 className="text-sm font-medium text-zinc-300">All caught up!</h3>
-                            <p className="text-xs text-zinc-500 mt-1">No new notifications right now.</p>
+
+                            <button
+                                onClick={handleClearAll}
+                                className="group flex items-center gap-1.5 bg-zinc-900/90 hover:bg-red-500/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-zinc-700/50 hover:border-red-500/50 shadow-lg transition-all duration-200"
+                            >
+                                <Trash2 size={14} className="text-zinc-400 group-hover:text-red-400" />
+                                <span className="text-xs font-semibold text-zinc-400 group-hover:text-red-400">Clear All</span>
+                            </button>
                         </motion.div>
-                    ) : (
-                        // Notification List
-                        <AnimatePresence mode="popLayout">
-                            {notifications.map((noti) => (
-                                <motion.div
-                                    layout
-                                    initial={{ opacity: 0, scale: 0.8, x: 50 }}
-                                    animate={{ opacity: 1, scale: 1, x: 0 }}
-                                    exit={{ opacity: 0, scale: 0.8, x: 50 }}
-                                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                                    key={noti.id}
-                                    className="relative w-full rounded-2xl shadow-xl bg-zinc-900/85 backdrop-blur-xl border border-zinc-700/50 text-white flex flex-col p-4 overflow-hidden group"
-                                >
-                                    <div className="flex items-start justify-between mb-2">
-                                        <div className="flex items-center gap-2 overflow-hidden pr-8">
-                                            {/* Clean up the app package name (e.g. com.whatsapp -> whatsapp) */}
-                                            <span className="bg-blue-600/90 text-blue-50 text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded flex-shrink-0">
-                                                {noti.app_package.split('.').pop()}
-                                            </span>
-                                            <span className="text-sm font-semibold truncate text-zinc-100">{noti.title}</span>
-                                        </div>
-                                        <span className="text-[10px] text-zinc-500 flex-shrink-0 pt-0.5">
-                                            {new Date(noti.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </span>
-                                    </div>
-
-                                    <p className="text-sm text-zinc-300 leading-relaxed pr-8 line-clamp-4">
-                                        {noti.message}
-                                    </p>
-
-                                    {noti.image_base64 && (
-                                        <div className="mt-3 relative rounded-lg overflow-hidden border border-zinc-700/50">
-                                            <img
-                                                src={`data:image/jpeg;base64,${noti.image_base64}`}
-                                                alt="attachment"
-                                                className="w-full max-h-40 object-cover"
-                                            />
-                                        </div>
-                                    )}
-
-                                    {/* Hover checkmark button */}
-                                    <button
-                                        onClick={() => handleMarkAsRead(noti.id)}
-                                        className="absolute bottom-4 right-4 bg-zinc-800 hover:bg-green-600 text-zinc-400 hover:text-white p-2 rounded-full shadow-lg border border-zinc-700/50 hover:border-green-500 transition-all duration-200 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0"
-                                        title="Mark as Read"
-                                    >
-                                        <Check size={16} strokeWidth={3} />
-                                    </button>
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
                     )}
                 </AnimatePresence>
+
+                {/* Stack of Cards or Empty State */}
+                <div className="flex flex-col gap-3 overflow-y-auto pb-4 custom-scrollbar pointer-events-auto">
+                    <AnimatePresence mode="wait">
+                        {notifications.length === 0 ? (
+                            <motion.div
+                                key="empty-state"
+                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                                className="flex flex-col items-center justify-center py-10 px-4 bg-zinc-900/50 backdrop-blur-md rounded-2xl border border-zinc-800/50 text-center shadow-lg"
+                            >
+                                <div className="bg-zinc-800/50 p-3 rounded-full mb-3">
+                                    <Inbox size={24} className="text-zinc-500" />
+                                </div>
+                                <h3 className="text-sm font-medium text-zinc-300">All caught up!</h3>
+                                <p className="text-xs text-zinc-500 mt-1">No new notifications right now.</p>
+                            </motion.div>
+                        ) : (
+                            <AnimatePresence mode="popLayout">
+                                {notifications.map((noti) => (
+                                    <motion.div
+                                        layout
+                                        initial={{ opacity: 0, scale: 0.8, x: 50 }}
+                                        animate={{ opacity: 1, scale: 1, x: 0 }}
+                                        exit={{ opacity: 0, scale: 0.8, x: 50 }}
+                                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                        key={noti.id}
+                                        className="relative w-full rounded-2xl shadow-xl bg-zinc-900/85 backdrop-blur-xl border border-zinc-700/50 text-white flex flex-col p-4 overflow-hidden group"
+                                    >
+                                        <div className="flex items-start justify-between mb-2">
+                                            <div className="flex items-center gap-2 overflow-hidden pr-8">
+                                                <span className="bg-blue-600/90 text-blue-50 text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded flex-shrink-0">
+                                                    {noti.app_package.split('.').pop()}
+                                                </span>
+                                                <span className="text-sm font-semibold truncate text-zinc-100">{noti.title}</span>
+                                            </div>
+                                            <span className="text-[10px] text-zinc-500 flex-shrink-0 pt-0.5">
+                                                {new Date(noti.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                        </div>
+
+                                        <p className="text-sm text-zinc-300 leading-relaxed pr-8 line-clamp-4">
+                                            {noti.message}
+                                        </p>
+
+                                        {noti.image_base64 && (
+                                            <div className="mt-3 relative rounded-lg overflow-hidden border border-zinc-700/50">
+                                                <img
+                                                    src={`data:image/jpeg;base64,${noti.image_base64}`}
+                                                    alt="attachment"
+                                                    className="w-full max-h-40 object-cover"
+                                                />
+                                            </div>
+                                        )}
+
+                                        <button
+                                            onClick={() => handleMarkAsRead(noti.id)}
+                                            className="absolute bottom-4 right-4 bg-zinc-800 hover:bg-green-600 text-zinc-400 hover:text-white p-2 rounded-full shadow-lg border border-zinc-700/50 hover:border-green-500 transition-all duration-200 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0"
+                                            title="Mark as Read"
+                                        >
+                                            <Check size={16} strokeWidth={3} />
+                                        </button>
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
+                        )}
+                    </AnimatePresence>
+                </div>
             </div>
+
+            {/* TESTING BUTTON */}
+            <button
+                onClick={handleAddTestNoti}
+                className="fixed bottom-6 right-6 flex items-center gap-2 pointer-events-auto bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-full shadow-lg border border-blue-400/50 transition-all z-50 group"
+            >
+                <Plus size={16} className="group-hover:rotate-90 transition-transform" />
+                <span className="font-semibold text-sm">Test Noti</span>
+            </button>
         </div>
     );
 }

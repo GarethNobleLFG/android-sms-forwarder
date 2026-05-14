@@ -1,19 +1,19 @@
 require('dotenv').config();
-const { app, BrowserWindow, screen, globalShortcut } = require('electron'); // 1. Added globalShortcut
+const { app, BrowserWindow, screen, globalShortcut } = require('electron');
 const path = require('path');
 
 app.disableHardwareAcceleration();
 app.commandLine.appendSwitch('--disable-http-cache');
 
 let overlayWindow;
-let lastKeyPressTime = 0; // 2. Variable to track double-tap timing
+let lastKeyPressTime = 0;
 
 function createOverlay() {
     const { width, height } = screen.getPrimaryDisplay().bounds;
 
     overlayWindow = new BrowserWindow({
         width: 400,
-        height: height, 
+        height: height,
         x: width - 400,
         y: 0,
         frame: false,
@@ -24,20 +24,18 @@ function createOverlay() {
         skipTaskbar: true,
         webPreferences: {
             nodeIntegration: true,
-            contextIsolation: false, 
-            backgroundThrottling: false // 3. CRITICAL: Prevents React interval from slowing down when window is hidden
+            contextIsolation: false,
+            backgroundThrottling: false
         }
     });
 
-    overlayWindow.setIgnoreMouseEvents(true, { forward: true });
-
     if (process.env.VITE_DEV_SERVER_URL) {
         overlayWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
-    } 
+    }
     else {
         overlayWindow.loadFile(path.join(__dirname, '../../dist/index.html'));
     }
-    
+
     overlayWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
         console.log('Overlay failed to load:', errorDescription);
     });
@@ -48,19 +46,20 @@ app.whenReady().then(() => {
 
     globalShortcut.register('Alt+P', () => {
         const currentTime = new Date().getTime();
-        
-        // Check if the previous 'Alt+P' press was within the last 500 milliseconds
+
         if (currentTime - lastKeyPressTime < 500) {
-            // Double tap detected! Toggle window visibility
             if (overlayWindow.isVisible()) {
                 overlayWindow.hide();
-            } 
+            }
             else {
                 overlayWindow.show();
-                overlayWindow.setAlwaysOnTop(true, 'screen-saver'); 
+                overlayWindow.setAlwaysOnTop(true, 'screen-saver');
+
+                // Creates event for React app to listen to for UI effects.
+                overlayWindow.webContents.executeJavaScript(`window.dispatchEvent(new Event('replay-animations'))`).catch(console.error);
             }
-            lastKeyPressTime = 0; 
-        } 
+            lastKeyPressTime = 0;
+        }
         else {
             lastKeyPressTime = currentTime;
         }
@@ -69,7 +68,6 @@ app.whenReady().then(() => {
     console.log('Push Notification Desktop Overlay is running!');
 });
 
-// 5. Clean up the shortcuts when the app closes
 app.on('will-quit', () => {
     globalShortcut.unregisterAll();
 });
