@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Check, Trash2, Inbox, Plus } from 'lucide-react';
+import audioFile from '../../../../assets/drumSound.wav'; 
 
 import { fetchLatestNotifications, markNotificationsAsRead } from '../hooks/notis';
 
 export default function Overlay() {
     const [notifications, setNotifications] = useState([]);
-    
+
     // This key forces Framer Motion to replay animations when it increments
     const [animationKey, setAnimationKey] = useState(0);
 
@@ -25,10 +26,18 @@ export default function Overlay() {
                     setNotifications((prev) => {
                         const existingIds = new Set(prev.map(n => n.id));
                         const uniqueNew = newNotis.filter(n => !existingIds.has(n.id));
+
+                        if (uniqueNew.length > 0) {
+                            const audio = new Audio(audioFile);
+                            audio.volume = 0.5;
+                            audio.play().catch(err => console.error("Audio playback blocked:", err));
+                        }
+
                         return [...uniqueNew, ...prev];
                     });
                 }
-            } catch (err) {
+            }
+            catch (err) {
                 console.error("Polling error:", err);
             }
         };
@@ -54,23 +63,26 @@ export default function Overlay() {
     };
 
     const handleAddTestNoti = () => {
+        const audio = new Audio(audioFile);
+        audio.volume = 0.5;
+        audio.play().catch(err => console.error("Audio playback blocked:", err));
         const testNotification = {
             id: `test-${Date.now()}`,
             app_package: 'com.tester.framer',
             title: 'Test Notification',
             message: 'This is a mocked notification to test the UI animations, scrolling, and layout. It looks great!',
             timestamp: Date.now(),
-            image_base64: null 
+            image_base64: null
         };
         setNotifications(prev => [testNotification, ...prev]);
     };
 
     return (
         <div className="fixed top-0 right-0 w-96 p-4 max-h-screen overflow-y-hidden flex flex-col gap-3 pointer-events-none">
-            
+
             {/* The animationKey is applied here! When it increments, everything inside resets! */}
-            <div key={animationKey} className="flex flex-col gap-3 h-full"> 
-                
+            <div key={animationKey} className="flex flex-col gap-3 h-full">
+
                 {/* Top Bar */}
                 <AnimatePresence>
                     {notifications.length > 0 && (
