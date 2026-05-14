@@ -25,7 +25,7 @@ export default function Overlay() {
                 if (newNotis && newNotis.length > 0) {
                     setNotifications((prev) => {
                         const existingIds = new Set(prev.map(n => n.id));
-                        const uniqueNew = newNotis.filter(n => !existingIds.has(n.id));
+                        const uniqueNew = newNotis.filter(n => !existingIds.has(n.id)); // This makes uniqueNew an array of IDs we haven't seen yet.
 
                         if (uniqueNew.length > 0) {
                             const audio = new Audio(audioFile);
