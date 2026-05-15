@@ -67,13 +67,17 @@ export default function Overlay() {
         const audio = new Audio(audioFile);
         audio.volume = 0.5;
         audio.play().catch(err => console.error("Audio playback blocked:", err));
+
+        // A placeholder Base64 image (a tiny red dot) just to prove the UI mounts it correctly
+        const tinyRedDotBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==";
+
         const testNotification = {
             id: `test-${Date.now()}`,
             app_package: 'com.tester.framer',
             title: 'Test Notification',
             message: 'This is a mocked notification to test the UI animations, scrolling, and layout. It looks great!',
             timestamp: Date.now(),
-            image_base64: null
+            image_base64: tinyRedDotBase64
         };
         setNotifications(prev => [testNotification, ...prev]);
     };
@@ -141,7 +145,10 @@ export default function Overlay() {
                                         <div className="flex items-start justify-between mb-2">
                                             <div className="flex items-center gap-2 overflow-hidden pr-8">
                                                 <span className="bg-blue-600/90 text-blue-50 text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded flex-shrink-0">
-                                                    {noti.app_package.split('.').pop()}
+                                                    {(() => {
+                                                        const parts = noti.app_package.split('.');
+                                                        return `${parts[1]} ${parts.pop()}` || noti.app_package;
+                                                    })()}
                                                 </span>
                                                 <span className="text-sm font-semibold truncate text-zinc-100">{noti.title}</span>
                                             </div>
@@ -187,6 +194,7 @@ export default function Overlay() {
                 <Plus size={16} className="group-hover:rotate-90 transition-transform" />
                 <span className="font-semibold text-sm">Test Noti</span>
             </button>
+
         </div>
     );
 }
