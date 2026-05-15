@@ -211,7 +211,7 @@ export default function Overlay() {
                 </div>
             </div>
 
-            {/* TESTING BUTTON */}
+            {/* TESTING BUTTON 
             <button
                 onClick={handleAddTestNoti}
                 className="fixed bottom-6 right-6 flex items-center gap-2 pointer-events-auto bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-full shadow-lg border border-blue-400/50 transition-all z-50 group"
@@ -219,6 +219,7 @@ export default function Overlay() {
                 <Plus size={16} className="group-hover:rotate-90 transition-transform" />
                 <span className="font-semibold text-sm">Test Noti</span>
             </button>
+            */}
 
         </div>
     );
