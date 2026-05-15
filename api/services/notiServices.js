@@ -5,10 +5,9 @@ const saveNotification = async (notificationData) => {
     return await messageRepo.create(notificationData);
 };
 
-const fetchLatest = async (dateString) => {
-    const targetDateStr = new Date(dateString || Date.now()).toDateString();
+const fetchLatest = async () => {
 
-    const messages = await messageRepo.findUnread(targetDateStr);
+    const messages = await messageRepo.findUnread();
 
     return messages.map(msg => ({
         id: msg._id,

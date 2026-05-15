@@ -34,9 +34,6 @@ const saveMessage = async (req, res) => {
 // Get latest messages for desktop overlay
 const getLatestMessages = async (req, res) => {
     try {
-        // Grab an optional date parameter from the URL (e.g., /latest?date=2026-05-14)
-        const targetDate = req.query.date; 
-        
         const formattedMessages = await notiService.fetchLatest(targetDate);
 
         res.json({
@@ -66,7 +63,8 @@ const markAsRead = async (req, res) => {
             status: 'success',
             message: `Successfully marked ${modifiedCount} messages as read.`
         });
-    } catch (error) {
+    } 
+    catch (error) {
         console.error('Error marking messages as read:', error);
         res.status(500).json({
             error: 'Failed to mark messages as read',

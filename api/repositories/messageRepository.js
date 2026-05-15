@@ -4,9 +4,9 @@ const create = async (data) => {
     return await new Messages(data).save();
 };
 
-const findUnread = async (dateString) => {
+const findUnread = async () => {
     // Get bounds for the requested date since the return timestamp is a Unix Epoch Timestamp.
-    const targetDate = new Date(dateString);
+    const targetDate = new Date();
 
     targetDate.setHours(0, 0, 0, 0);
     const startTimestamp = targetDate.getTime();
