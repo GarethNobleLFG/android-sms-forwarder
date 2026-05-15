@@ -27,14 +27,18 @@ const messageSchema = new mongoose.Schema({
     },
     image_base64: {
         type: String,
-        required: false 
+        required: false
+    },
+    icon_base64: {         
+        type: String,
+        required: false
     },
     read: {
         type: Boolean,
-        default: false 
+        default: false
     }
 }, {
-    timestamps: true 
+    timestamps: true
 });
 
 module.exports = mongoose.model('Messages', messageSchema);

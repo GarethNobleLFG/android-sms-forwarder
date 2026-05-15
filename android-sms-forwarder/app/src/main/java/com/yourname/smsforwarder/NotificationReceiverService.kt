@@ -2,6 +2,7 @@ package com.yourname.smsforwarder
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Base64
@@ -10,6 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
+import java.util.UUID
 
 class NotificationReceiverService : NotificationListenerService() {
 
@@ -17,10 +19,17 @@ class NotificationReceiverService : NotificationListenerService() {
         val notification = sbn?.notification ?: return
         val extras = notification.extras
         
-        // Ignore system notifications to reduce spam
         val appPackage = sbn.packageName
-        if (appPackage == "android" || appPackage == "com.android.systemui") {
-            return
+        
+        // ONLY allow known SMS apps to be forwarded
+        val allowedSmsApps = listOf(
+            "com.google.android.apps.messaging", // Google Messages
+            "com.samsung.android.messaging"      // Samsung Messages
+        )
+        
+        // Skip this notification if it's not an SMS
+        if (appPackage !in allowedSmsApps) {
+            return 
         }
         
         // 1. Extract Text Data
@@ -38,19 +47,43 @@ class NotificationReceiverService : NotificationListenerService() {
             base64Image = bitmapToBase64(picture)
         }
 
-        Log.d("NotificationService", "Push from $appPackage: $title - $messageBody (Has Image: ${picture != null})")
+        // 3. Extract the Icon (Avatar/App Logo)
+        var base64Icon: String? = null
+        try {
+            val largeIcon = notification.getLargeIcon()
+            if (largeIcon != null) {
+                val drawable = largeIcon.loadDrawable(applicationContext)
+                if (drawable != null) {
+                    // Convert drawable to bitmap
+                    val bitmap = Bitmap.createBitmap(
+                        drawable.intrinsicWidth.coerceAtLeast(1),
+                        drawable.intrinsicHeight.coerceAtLeast(1),
+                        Bitmap.Config.ARGB_8888
+                    )
+                    val canvas = Canvas(bitmap)
+                    drawable.setBounds(0, 0, canvas.width, canvas.height)
+                    drawable.draw(canvas)
+                    base64Icon = bitmapToBase64(bitmap)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("NotificationService", "Failed to extract icon", e)
+        }
+
+        Log.d("NotificationService", "Push from $appPackage: $title - $messageBody (Has Image: ${picture != null}, Has Icon: ${base64Icon != null})")
         
-        // 3. Package it up into our new Data Class
+        // 4. Package it up into our new Data Class (Includes iconBase64)
         val data = NotificationData(
             appPackage = appPackage,
             title = title,
             message = messageBody,
             imageBase64 = base64Image,
+            iconBase64 = base64Icon,
             timestamp = sbn.postTime,
             deviceId = getDeviceId(applicationContext) 
         )
         
-        // 4. Send it to the API
+        // 5. Send it to the API
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 ApiService(applicationContext).forwardNotification(data)
@@ -77,19 +110,20 @@ class NotificationReceiverService : NotificationListenerService() {
         val sharedPrefs = context.getSharedPreferences("sms_forwarder_prefs", Context.MODE_PRIVATE)
         var deviceId = sharedPrefs.getString("device_id", null)
         if (deviceId == null) {
-            deviceId = java.util.UUID.randomUUID().toString()
+            deviceId = UUID.randomUUID().toString()
             sharedPrefs.edit().putString("device_id", deviceId).apply()
         }
         return deviceId
     }
 }
 
-// Our updated data model
+// Our updated data model includes iconBase64
 data class NotificationData(
     val appPackage: String,
     val title: String,
     val message: String,
-    val imageBase64: String?, // Nullable if no image exists
+    val imageBase64: String?, 
+    val iconBase64: String?,
     val timestamp: Long,
     val deviceId: String
 )

@@ -68,8 +68,7 @@ export default function Overlay() {
         audio.volume = 0.5;
         audio.play().catch(err => console.error("Audio playback blocked:", err));
 
-        // A placeholder Base64 image (a tiny red dot) just to prove the UI mounts it correctly
-        const tinyRedDotBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==";
+        const redBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==";
 
         const testNotification = {
             id: `test-${Date.now()}`,
@@ -77,7 +76,7 @@ export default function Overlay() {
             title: 'Test Notification',
             message: 'This is a mocked notification to test the UI animations, scrolling, and layout. It looks great!',
             timestamp: Date.now(),
-            image_base64: tinyRedDotBase64
+            image_base64: redBase64
         };
         setNotifications(prev => [testNotification, ...prev]);
     };
@@ -142,17 +141,31 @@ export default function Overlay() {
                                         key={noti.id}
                                         className="relative w-full rounded-2xl shadow-xl bg-zinc-900 border border-zinc-700 text-white flex flex-col p-4 overflow-hidden group shrink-0"
                                     >
-                                        <div className="flex items-start justify-between mb-2">
-                                            <div className="flex items-center gap-2 overflow-hidden pr-8">
-                                                <span className="bg-blue-600/90 text-blue-50 text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded flex-shrink-0">
-                                                    {(() => {
-                                                        const parts = noti.app_package.split('.');
-                                                        return `${parts[1]} ${parts.pop()}` || noti.app_package;
-                                                    })()}
-                                                </span>
-                                                <span className="text-sm font-semibold truncate text-zinc-100">{noti.title}</span>
+                                        <div className="flex items-start justify-between mb-3">
+                                            <div className="flex items-start gap-3 overflow-hidden pr-8">
+                                                {noti.icon_base64 ? (
+                                                    <img
+                                                        src={`data:image/png;base64,${noti.icon_base64}`}
+                                                        className="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-zinc-700/50 shadow-sm mt-0.5"
+                                                        alt="Icon"
+                                                    />
+                                                ) : (
+                                                    <div className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700/50 flex-shrink-0 flex items-center justify-center mt-0.5">
+                                                        <Bell size={16} className="text-zinc-500" />
+                                                    </div>
+                                                )}
+
+                                                <div className="flex flex-col items-start overflow-hidden pt-0.5">
+                                                    <span className="text-sm font-bold truncate text-zinc-100 max-w-full">{noti.title}</span>
+                                                    <span className="bg-blue-600/90 text-blue-50 text-[9px] uppercase tracking-wider font-bold px-1.5 py-[2px] rounded mt-1 flex-shrink-0">
+                                                        {(() => {
+                                                            const parts = noti.app_package.split('.');
+                                                            return parts.length > 1 ? `${parts[1]} ${parts.pop()}` : noti.app_package;
+                                                        })()}
+                                                    </span>
+                                                </div>
                                             </div>
-                                            <span className="text-[10px] text-zinc-500 flex-shrink-0 pt-0.5">
+                                            <span className="text-[10px] text-zinc-500 flex-shrink-0 pt-1 font-medium">
                                                 {new Date(noti.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </span>
                                         </div>
