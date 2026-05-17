@@ -26,7 +26,8 @@ const fetchLatest = async () => {
 const markNotificationsAsRead = async (idsArray) => {
     if (!idsArray || idsArray.length === 0) return 0;
 
-    const result = await messageRepo.markAsRead(idsArray);
+    const result = await messageRepo.update(idsArray, { read: true });
+
     console.log(`Updated read status of ${result.modifiedCount} notifications!`);
     return result.modifiedCount;
 };

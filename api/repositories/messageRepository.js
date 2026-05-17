@@ -11,10 +11,10 @@ const find = async (startTimestamp, endTimestamp) => {
     }).select('_id app_package title message image_base64 icon_base64 large_icon_base64 read timestamp');
 };
 
-const markAsRead = async (ids) => {
+const update = async (ids, updateData) => {
     return await Messages.updateMany(
         { _id: { $in: ids } },
-        { $set: { read: true } }
+        { $set: updateData }
     );
 };
 
@@ -25,6 +25,6 @@ const deleteAll = async () => {
 module.exports = {
     create,
     find,
-    markAsRead,
+    update,
     deleteAll
 };
