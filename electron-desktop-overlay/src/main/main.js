@@ -52,11 +52,12 @@ app.whenReady().then(() => {
                 overlayWindow.hide();
             }
             else {
-                overlayWindow.show();
-                overlayWindow.setAlwaysOnTop(true, 'screen-saver');
-
-                // Creates event for React app to listen to for UI effects.
                 overlayWindow.webContents.executeJavaScript(`window.dispatchEvent(new Event('replay-animations'))`).catch(console.error);
+
+                setTimeout(() => {
+                    overlayWindow.show();
+                    overlayWindow.setAlwaysOnTop(true, 'screen-saver');
+                }, 50); 
             }
             lastKeyPressTime = 0;
         }
