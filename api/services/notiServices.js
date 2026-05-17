@@ -6,8 +6,10 @@ const saveNotification = async (notificationData) => {
 };
 
 const fetchLatest = async () => {
+    const endTimestamp = Date.now();
+    const startTimestamp = endTimestamp - (30 * 60 * 1000); // 30 minutes in milliseconds
 
-    const messages = await messageRepo.findUnread();
+    const messages = await messageRepo.find(startTimestamp, endTimestamp);
 
     return messages.map(msg => ({
         id: msg._id,
@@ -16,7 +18,7 @@ const fetchLatest = async () => {
         message: msg.message,
         image_base64: msg.image_base64,
         icon_base64: msg.icon_base64,
-        large_icon_base64: msg.large_icon_base64, 
+        large_icon_base64: msg.large_icon_base64,
         timestamp: msg.timestamp
     }));
 };
